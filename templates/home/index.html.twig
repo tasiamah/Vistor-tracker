@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+
+    <div class="container">
+        <h1>Home Page</h1>
+        <ul>
+            <li class="visitors">Please wait</li>
+            <li class="my-browser">Please wait</li>
+            <li class="same-browsers">Please wait</li>
+            <li class="greetings">Please wait</li>
+            <li class="screen-size">Please wait</li>
+        </ul>
+        <a href="{{ path('child_page') }}?source=main_page">Child Page</a>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+
+            $('.screen-size').html(`Your screen size is ${screen.width}x${screen.height}`);
+            let myLocation = null;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position){
+                    myLocation = [position.coords.latitude, position.coords.longitude];
+                    track(myLocation);
+                });
+            }
+        });
+
+        function track(myLocation){
+            $.ajax({
+                url : '{{ path('home') }}',
+                data: {source: window.location.search.indexOf('source') !== -1, location: myLocation, page_name: 'Home', screen_size: screen.width + 'x' + screen.height},
+                method : 'post',
+                dataType : 'json',
+                success : function(r){
+                    $('.greetings').html(r.data.greetings);
+                    $('.visitors').html(`${r.data.visitors} visitors so far on this page`);
+                    $('.my-browser').html(`Your browser is ${r.data.my_browser}`);
+                    $('.same-browsers').html(`${r.data.same_browsers} other users use same browser`);
+                }
+            });
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+
+{% block title %}Child Page{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Child Page</h1>
+        <ul>
+            <li class="direct-hits">Please wait</li>
+            <li class="indirect-hits">Please wait</li>
+            <li class="greetings">Please wait</li>
+            <li class="screen-size">Please wait</li>
+        </ul>
+
+        <h3>Contact Us</h3>
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button class="btn btn-primary">{{ button_label|default('Submit') }}</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+            $('.screen-size').html(`Your screen size is ${screen.width}x${screen.height}`);
+            let myLocation = null;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position){
+                    myLocation = [position.coords.latitude, position.coords.longitude];
+                    track(myLocation);
+                });
+            }
+        });
+
+        function track(myLocation){
+            $.ajax({
+                url : '{{ path('home') }}',
+                data: {source: window.location.search.indexOf('source') !== -1, location: myLocation, page_name: 'Child', screen_size: screen.width + 'x' + screen.height},
+                method : 'post',
+                success : function(r){
+                    $('.greetings').html(r.data.greetings);
+                    $('.screen-size').html(r.data.screenSize);
+                    $('.direct-hits').html(r.data.child_direct_hits + ' Direct hits');
+                    $('.indirect-hits').html(r.data.child_indirect_hits + ' Indirect hits');
+                }
+            });
+        }
+    </script>
+{% endblock %}
